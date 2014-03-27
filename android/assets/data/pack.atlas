@@ -1,0 +1,40 @@
+
+pack.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+background
+  rotate: false
+  xy: 256, 28
+  size: 4, 4
+  orig: 4, 4
+  offset: 0, 0
+  index: -1
+checked
+  rotate: false
+  xy: 256, 48
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+knob
+  rotate: false
+  xy: 272, 48
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: -1
+nahwc_title
+  rotate: false
+  xy: 0, 0
+  size: 256, 64
+  orig: 256, 64
+  offset: 0, 0
+  index: -1
+unchecked
+  rotate: false
+  xy: 256, 32
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
