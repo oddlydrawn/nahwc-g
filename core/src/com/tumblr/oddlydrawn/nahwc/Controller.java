@@ -37,8 +37,8 @@ public class Controller {
 	}
 
 	public void update () {
-		if (dir == LEFT) worm.goLeft();
-		if (dir == RIGHT) worm.goRight();
+		if (dir == LEFT) worm.turnLeft();
+		if (dir == RIGHT) worm.turnRight();
 		dir = STRAIGHT;
 	}
 
@@ -63,7 +63,7 @@ public class Controller {
 	}
 
 	public boolean leftTouched () {
-		if (Gdx.input.isTouched() && inputX < screenWidthPx / 2) return true;
+		if (Gdx.input.isTouched() && inputX <= screenWidthPx / 2) return true;
 		return false;
 	}
 }

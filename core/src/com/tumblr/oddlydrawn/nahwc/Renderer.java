@@ -31,6 +31,13 @@ public class Renderer {
 	private final String FONT_LOC = "data/font/dfont.fnt";
 	private final String SCORE = "Score: ";
 	private final String HI_SCORE = "HiScore: ";
+	private final float HALF = 0.5f;
+	private final float DEFAULT_RED = 0.8f;
+	private final int SCORE_STRING_HEIGHT = 40;
+	private final int SCORE_HORIZ_POS = 10;
+	private final int HI_SCORE_STRING_HORIZ_POS = 36;
+	private final int HI_SCORE_HORIZ_POS = 49;
+	private final int V_PAD = 2;
 	private ShapeRenderer shapeRenderer;
 	private OrthographicCamera cam;
 	private Random random;
@@ -38,7 +45,6 @@ public class Renderer {
 	private Color color;
 	private Worm worm;
 	private Food food;
-	private Level level;
 	private Rectangle rect;
 	private Vector2Marked[] wholeWorm;
 	private SpriteBatch batch;
@@ -48,6 +54,7 @@ public class Renderer {
 	private float r = 1;
 	private float g = 255;
 	private float b = 255;
+	private float halfTileSize;
 	private int[][] levelArray;
 	private int score;
 	private int hiScore;
@@ -63,7 +70,6 @@ public class Renderer {
 		this.worm = worm;
 		wholeWorm = worm.getAllBody();
 		this.food = food;
-		this.level = level;
 		levelArray = level.getLevelArray();
 		shapeRenderer = new ShapeRenderer();
 		random = new Random();
@@ -98,13 +104,13 @@ public class Renderer {
 	private void renderWorld () {
 		// walls
 		shapeRenderer.setColor(Color.GRAY);
-		for (int y = level.TILES_HEIGHT - 1; y >= 0; y--) {
-			for (int x = 0; x < level.TILES_WIDTH; x++) {
-				if (levelArray[x][y] == level.WALL) {
-					rect.x = x * level.SIZE;
-					rect.y = y * level.SIZE;
-					rect.width = level.SIZE;
-					rect.height = level.SIZE;
+		for (int y = Level.TILES_HEIGHT - 1; y >= 0; y--) {
+			for (int x = 0; x < Level.TILES_WIDTH; x++) {
+				if (levelArray[x][y] == Level.WALL) {
+					rect.x = x * Level.SIZE;
+					rect.y = y * Level.SIZE;
+					rect.width = Level.SIZE;
+					rect.height = Level.SIZE;
 					shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
 				}
 			}
@@ -122,9 +128,10 @@ public class Renderer {
 
 	private void renderWorm (float animSize) {
 		shapeRenderer.setColor(color);
-		// XXX I set up the problem wrong, though, and I subtract 8 to fix it
-		drawOffset = 0.5f * animSize + 4f;
-		drawOffset -= 8;
+		halfTileSize = Level.SIZE * HALF;
+		// XXX I set up the problem wrong, though, and I subtract Level's size to fix it
+		drawOffset = HALF * animSize + halfTileSize;
+		drawOffset -= Level.SIZE;
 		for (int i = 0; i < worm.getBodyLength(); i++) {
 			if (wholeWorm[i].getMarked() == true) {
 				rect.x = wholeWorm[i].x - drawOffset;
@@ -134,8 +141,8 @@ public class Renderer {
 			} else {
 				rect.x = wholeWorm[i].x;
 				rect.y = wholeWorm[i].y;
-				rect.height = 8;
-				rect.width = 8;
+				rect.height = Level.SIZE;
+				rect.width = Level.SIZE;
 			}
 			shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
 		}
@@ -159,8 +166,8 @@ public class Renderer {
 		g = random.nextFloat();
 		b = random.nextFloat();
 		// It might be too dark, this might fix that.
-		if ((r < 0.5 && g < 0.5) && (g < 0.5 && b < 0.5)) {
-			r = 0.8f;
+		if ((r < HALF && g < HALF) && (g < HALF && b < HALF)) {
+			r = DEFAULT_RED;
 		}
 		color.r = r;
 		color.g = g;
@@ -168,26 +175,22 @@ public class Renderer {
 	}
 
 	public void changeOutline () {
-		if (filled) {
-			filled = false;
-		} else {
-			filled = true;
-		}
+		filled = !filled;
 	}
 
 	public OrthographicCamera getCam () {
 		return cam;
 	}
 
-	public void setHiScore (int hi) {
-		hiScore = hi;
+	public void setHiScore (int hiScore) {
+		this.hiScore = hiScore;
 	}
 
 	public void init () {
-		scoreHeight = 40 * level.SIZE + 2;
-		scoreNumberWidth = 10 * level.SIZE;
-		hiScoreWidth = 36 * level.SIZE;
-		scoreHiNumberWidth = 49 * level.SIZE;
+		scoreHeight = SCORE_STRING_HEIGHT * Level.SIZE + V_PAD;
+		scoreNumberWidth = SCORE_HORIZ_POS * Level.SIZE;
+		hiScoreWidth = HI_SCORE_STRING_HORIZ_POS * Level.SIZE;
+		scoreHiNumberWidth = HI_SCORE_HORIZ_POS * Level.SIZE;
 	}
 
 	public void dispose () {

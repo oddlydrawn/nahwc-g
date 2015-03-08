@@ -27,15 +27,26 @@ import com.badlogic.gdx.math.Rectangle;
 
 /** @author oddlydrawn */
 public class God {
+	private final String SCORES_STRING = "scores";
+	private final String NO_FAST_STRING = "noFast";
+	private final String FILE_EXT = ".txt";
 	private final float UPDATE_SPEED_DECREASE_ZERO = 0.0003125f; // 0.0003125f
 	private final float UPDATE_SPEED_DECREASE_ONE = 0.000625f; // 0.000625f
 	private final float UPDATE_SPEED_DECREASE_TWO = 0.00125f; // 0.00125f
 	private final float UPDATE_SPEED_DECREASE_THREE = 0.0025f; // 0.0025f
 	private final float UPDATE_SPEED_DECREASE_FOUR = 0.005f; // 0.005f
 	private final float UPDATE_SPEED_DECREASE_FIVE = 0.01f; // 0.01f
-	private final float SIZE = 8; // 8
+	private final float SCREEN_WIDTH_PX = 480;
+	private final float SCREEN_HEIGHT_PX = 320;
+	private final float WORM_SIZE_PX = 80;
+	private final float START_TIME = 0.85f;
 	private final int WORM_LENGTH = 10; // 10
 	private final int NUMBER_OF_FOOD = 5;
+	private final int COLOR_MULTIPLE = 10;
+	private final int OUTLINE_MULTIPLE = 20;
+	private final int SCREEN_WIDTH_TILES = 59;
+	private final int SCREEN_HEIGHT_TILES = 39;
+	private final int TEXT_PADDING = 2;
 	private float updateSpeed = 0.2f; // 0.2f
 	private OrthographicCamera cam;
 	private Renderer renderer;
@@ -57,10 +68,9 @@ public class God {
 	private float animSize;
 	private float decreaseSpeed;
 	private float stateTime;
+	private float halfUpdate;
 	private int counter;
 	private int score;
-	private int screenWidth = 59;
-	private int screenHeight = 39;
 	private int highScore;
 	private int tmpScore;
 	private int levelNumber;
@@ -114,14 +124,14 @@ public class God {
 
 		// Loads high score.
 		FileHandle handle;
-		scoresFile = "scores";
+		scoresFile = SCORES_STRING;
 		scoresFile += String.valueOf(levelNumber);
 		if (isFaster) {
 			scoresFile += String.valueOf(fasterSpeed);
 		} else {
-			scoresFile += "noFast";
+			scoresFile += NO_FAST_STRING;
 		}
-		scoresFile += ".txt";
+		scoresFile += FILE_EXT;
 
 		if (Gdx.files.local(scoresFile).exists()) {
 			handle = Gdx.files.local(scoresFile);
@@ -142,13 +152,13 @@ public class God {
 		startX = level.getStartCoords().x;
 		startY = level.getStartCoords().y;
 
-		bounds = new Rectangle(startX, startY, SIZE, SIZE);
+		bounds = new Rectangle(startX, startY, Level.SIZE, Level.SIZE);
 		worm = new Worm(bounds, WORM_LENGTH);
-		cam = new OrthographicCamera(480, 320);
-		cam.setToOrtho(false, 480, 320);
+		cam = new OrthographicCamera();
+		cam.setToOrtho(false, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
 		food = new Food();
 		renderer = new Renderer(cam, worm, food, level);
-		testRect = new Rectangle(0, 0, SIZE, SIZE);
+		testRect = new Rectangle(0, 0, Level.SIZE, Level.SIZE);
 		rnd = new Random();
 
 		collision = new CheckCollision(food, worm, level);
@@ -165,7 +175,7 @@ public class God {
 
 	public void dispose () {
 		renderer.dispose();
-		musicPlayer.dispose();	
+		musicPlayer.dispose();
 	}
 
 	public void runGame () {
@@ -206,13 +216,14 @@ public class God {
 				}
 			}
 
-			if (timer < updateSpeed / 2) {
+			halfUpdate = updateSpeed / 2;
+			if (timer < halfUpdate) {
 				// A formula for scale in relation to time (8 to 16 for first half
 				// of a pause between worm updateSpeed updates).
-				animSize = 80 * timer + 8;
-			} else if (timer > updateSpeed / 2) {
+				animSize = WORM_SIZE_PX * timer + Level.SIZE;
+			} else if (timer > halfUpdate) {
 				// This shrinks the scale for the second half of the worm update.
-				animSize = -80 * timer + 24;
+				animSize = -WORM_SIZE_PX * timer + Level.SIZE * 3;
 			} else {
 				animSize = 0;
 			}
@@ -228,32 +239,32 @@ public class God {
 				tmpScore = score + 1;
 				if (isFaster) updateSpeed -= decreaseSpeed;
 				if (isColor) {
-					if (tmpScore % 10 == 0) renderer.changeColor();
+					if (tmpScore % COLOR_MULTIPLE == 0) renderer.changeColor();
 				}
 				if (isOutline && !isPermOutline) {
-					if (tmpScore % 20 == 0) renderer.changeOutline();
+					if (tmpScore % OUTLINE_MULTIPLE == 0) renderer.changeOutline();
 				}
 			}
 		} else {
-			stateTime += Gdx.graphics.getDeltaTime();
-			if (stateTime > 0.85f) startGame = true;
+			stateTime += delta;
+			if (stateTime > START_TIME) startGame = true;
 		}
 	}
 
 	public void makeInitialFood () {
 		do {
-			testRect.x = rnd.nextInt(screenWidth) * 8;
-			testRect.y = rnd.nextInt(screenHeight - 2) * 8;
+			testRect.x = rnd.nextInt(SCREEN_WIDTH_TILES) * Level.SIZE;
+			testRect.y = rnd.nextInt(SCREEN_HEIGHT_TILES - TEXT_PADDING) * Level.SIZE;
 		} while (collision.thisAndAll(testRect));
-		food.createInitial(testRect.x, testRect.y, SIZE);
+		food.createInitial(testRect.x, testRect.y, Level.SIZE);
 	}
 
 	public void makeNewFood () {
 		do {
-			testRect.x = rnd.nextInt(screenWidth) * 8;
-			testRect.y = rnd.nextInt(screenHeight - 2) * 8;
+			testRect.x = rnd.nextInt(SCREEN_WIDTH_TILES) * Level.SIZE;
+			testRect.y = rnd.nextInt(SCREEN_HEIGHT_TILES - TEXT_PADDING) * Level.SIZE;
 		} while (collision.thisAndAll(testRect));
-		food.createOne(testRect.x, testRect.y, SIZE);
+		food.createOne(testRect.x, testRect.y, Level.SIZE);
 	}
 
 	public void saveScore () {

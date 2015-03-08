@@ -20,38 +20,45 @@ import java.util.ArrayList;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Food {
-	ArrayList<Rectangle> allFood = new ArrayList<Rectangle>();
+	ArrayList<Rectangle> foodList = new ArrayList<Rectangle>();
+	private final float OUT_OF_BOUNDS = -50;
 	Rectangle food;
 	int eatenIndex;
 
 	public Food () {
-		allFood = new ArrayList<Rectangle>();
+		foodList = new ArrayList<Rectangle>();
 	}
 
 	public void createOne (float x, float y, float SIZE) {
-		allFood.get(eatenIndex).setX(x);
-		allFood.get(eatenIndex).setY(y);
-		allFood.get(eatenIndex).setWidth(SIZE);
-		allFood.get(eatenIndex).setHeight(SIZE);
+		food = foodList.get(eatenIndex);
+		food.setX(x);
+		food.setY(y);
+		food.setWidth(SIZE);
+		food.setHeight(SIZE);
 	}
 
 	public void createInitial (float x, float y, float SIZE) {
 		food = new Rectangle(x, y, SIZE, SIZE);
-		allFood.add(food);
+		foodList.add(food);
 	}
 
 	public ArrayList<Rectangle> getFood () {
-		return allFood;
+		return foodList;
 	}
 
 	public void removeOne (int index) {
-		allFood.get(index).setX(-50);
-		allFood.get(index).setY(0);
+		food = foodList.get(index);
+		food.setX(OUT_OF_BOUNDS);
+		food.setY(OUT_OF_BOUNDS);
 		eatenIndex = index;
 	}
 
 	public ArrayList<Rectangle> getRectangles () {
-		return allFood;
+		return foodList;
+	}
+
+	public int getNum () {
+		return foodList.size();
 	}
 
 	public void update () {

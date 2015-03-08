@@ -24,11 +24,11 @@ import com.badlogic.gdx.math.Vector2;
 
 /** @author oddlydrawn */
 public class Level {
-	public final int TILES_WIDTH = 60;
-	public final int TILES_HEIGHT = 40;
-	public final int WALL = 1;
+	public static final int TILES_WIDTH = 60;
+	public static final int TILES_HEIGHT = 40;
+	public static final int WALL = 1;
+	public final static int SIZE = 8;
 	private final String COLLIDES = "collides";
-	public final int SIZE = 8;
 	private final String START = "start";
 	private final String LEVEL_PREFIX = "data/maps/level";
 	private final String LEVEL_POSTFIX = ".tmx";

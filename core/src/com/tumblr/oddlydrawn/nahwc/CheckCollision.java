@@ -16,53 +16,65 @@
 
 package com.tumblr.oddlydrawn.nahwc;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.math.Rectangle;
 
 /** @author oddlydrawn */
 public class CheckCollision {
-	final float SIZE = 8;
 	Worm worm;
 	Food food;
 	Rectangle head;
 	Level level;
-	Rectangle tmpRect;
+	Rectangle bodyRect;
 	Rectangle body;
+	Vector2Marked bodySegment;
+	ArrayList<Rectangle> foodList;
+	Rectangle foodRect;
 	int[][] levelArray;
 	int tmpX;
 	int tmpY;
+	int bodyLength;
+	int numFood;
+	int levelTile;
 
 	public CheckCollision (Food food, Worm worm, Level level) {
 		this.food = food;
 		this.worm = worm;
 		this.level = level;
-		tmpRect = new Rectangle();
+		bodyRect = new Rectangle();
+		foodRect = new Rectangle();
+		foodList = food.getRectangles();
 		setWorm(worm);
 		setLevel(level);
 	}
 
 	public boolean wormAndWorm () {
 		updateHead();
-		for (int i = 1; i < worm.getBodyLength(); i++) {
-			body.x = worm.getAllBody()[i].x;
-			body.y = worm.getAllBody()[i].y;
-			body.width = SIZE;
-			body.height = SIZE;
+		bodyLength = worm.getBodyLength();
+		for (int i = 1; i < bodyLength; i++) {
+			bodySegment = worm.getBodySegment(i);
+			body.x = bodySegment.x;
+			body.y = bodySegment.y;
+			body.width = Level.SIZE;
+			body.height = Level.SIZE;
 			if (head.overlaps(body)) return true;
 		}
 		return false;
 	}
 
 	public boolean wormAndWall () {
-		tmpX = (int)worm.getAllBody()[0].x;
-		tmpY = (int)worm.getAllBody()[0].y;
-		if (level.isWallAt(tmpX, tmpY)) return true;
-		return false;
+		tmpX = worm.getHeadIntX();
+		tmpY = worm.getHeadIntY();
+		return wallCollidesWith(tmpX, tmpY);
 	}
 
 	public boolean wormAndFood () {
 		updateHead();
-		for (int i = 0; i < food.getRectangles().size(); i++) {
-			if (food.getRectangles().get(i).overlaps(head)) {
+		numFood = food.getNum();
+		for (int i = 0; i < numFood; i++) {
+			foodRect = foodList.get(i);
+			if (foodRect.overlaps(head)) {
 				food.removeOne(i);
 				return true;
 			}
@@ -71,35 +83,49 @@ public class CheckCollision {
 	}
 
 	public boolean thisAndAll (Rectangle testRect) {
-		for (int i = 0; i < food.getRectangles().size(); i++) {
-			if (food.getRectangles().get(i).overlaps(testRect)) return true;
+		numFood = food.getNum();
+		for (int i = 0; i < numFood; i++) {
+			foodRect = foodList.get(i);
+			if (foodRect.overlaps(testRect)) return true;
 		}
 		tmpX = (int)testRect.x;
 		tmpY = (int)testRect.y;
-		tmpX /= level.SIZE;
-		tmpY /= level.SIZE;
-		if (levelArray[tmpX][tmpY] == level.WALL) return true;
 
-		for (int i = 0; i < worm.getBodyLength(); i++) {
-			tmpRect.x = worm.getAllBody()[i].x;
-			tmpRect.y = worm.getAllBody()[i].y;
-			tmpRect.width = level.SIZE;
-			tmpRect.height = level.SIZE;
-			if (testRect.overlaps(tmpRect)) return true;
+		if (wallCollidesWith(tmpX, tmpY)) return true;
+
+		bodyLength = worm.getBodyLength();
+		for (int i = 0; i < bodyLength; i++) {
+			bodySegment = worm.getBodySegment(i);
+			bodyRect.x = bodySegment.x;
+			bodyRect.y = bodySegment.y;
+			bodyRect.width = Level.SIZE;
+			bodyRect.height = Level.SIZE;
+			if (testRect.overlaps(bodyRect)) return true;
 		}
 		return false;
 	}
 
+	private boolean wallCollidesWith (float x, float y) {
+		tmpX = (int)x / Level.SIZE;
+		tmpY = (int)y / Level.SIZE;
+
+		levelTile = levelArray[tmpX][tmpY];
+		return (levelTile == Level.WALL);
+	}
+
 	private void updateHead () {
-		head.set(worm.getAllBody()[0].x, worm.getAllBody()[0].y, SIZE, SIZE);
+		head.x = worm.getHeadIntX();
+		head.y = worm.getHeadIntY();
 	}
 
 	public void setWorm (Worm w) {
-		head = new Rectangle(w.getAllBody()[0].x, w.getAllBody()[0].y, SIZE, SIZE);
+		tmpX = w.getHeadIntX();
+		tmpY = w.getHeadIntY();
+		head = new Rectangle(tmpX, tmpY, Level.SIZE, Level.SIZE);
 		body = new Rectangle();
 	}
 
-	public void setLevel (Level l) {
-		levelArray = l.getLevelArray();
+	public void setLevel (Level level) {
+		levelArray = level.getLevelArray();
 	}
 }

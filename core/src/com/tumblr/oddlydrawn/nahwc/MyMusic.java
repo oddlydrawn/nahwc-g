@@ -21,6 +21,7 @@ import com.badlogic.gdx.audio.Sound;
 
 /** @author oddlydrawn */
 public class MyMusic {
+	private float volume = 1.0f;
 	Sound soundPickup;
 
 	public MyMusic () {
@@ -28,7 +29,7 @@ public class MyMusic {
 	}
 
 	public void playPickup () {
-		soundPickup.play(1.0f);
+		soundPickup.play(volume);
 	}
 
 	public void dispose () {

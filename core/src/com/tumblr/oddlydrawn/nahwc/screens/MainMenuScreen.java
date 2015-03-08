@@ -82,7 +82,7 @@ public class MainMenuScreen implements Screen {
 	int fasterSpeed = 0;
 
 	public MainMenuScreen (Game g) {
-		cam = new OrthographicCamera(480, 320);
+		cam = new OrthographicCamera(WIDTH, HEIGHT);
 		game = g;
 		batch = new SpriteBatch();
 		titleSprite = new Sprite();
@@ -306,7 +306,7 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void resize (int width, int height) {
-	    stage.getViewport().update(width, height, true);
+		stage.getViewport().update(width, height, true);
 	}
 
 	@Override

@@ -25,9 +25,9 @@ public class Vector2Marked {
 	public Vector2Marked () {
 	}
 
-	public Vector2Marked (float tmpX, float tmpY) {
-		x = tmpX;
-		y = tmpY;
+	public Vector2Marked (float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	public boolean getMarked () {
@@ -42,8 +42,8 @@ public class Vector2Marked {
 		marked = false;
 	}
 
-	public void set (float tmpX, float tmpY) {
-		x = tmpX;
-		y = tmpY;
+	public void set (float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 }

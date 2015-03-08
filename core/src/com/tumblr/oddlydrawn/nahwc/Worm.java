@@ -29,8 +29,8 @@ public class Worm {
 	private float tmpX;
 	private float tmpY;
 	private int dir;
-	private int screenWidth = 60;
-	private int screenHeight = 40;
+	private int tileWidth;
+	private int tileHeight;
 	private int bodyLength;
 	private int score;
 	private int originalLength;
@@ -46,6 +46,8 @@ public class Worm {
 		bodyLength = wormLength;
 		updateBody();
 		originalLength = wormLength;
+		tileWidth = Level.TILES_WIDTH;
+		tileHeight = Level.TILES_HEIGHT;
 	}
 
 	public void update () {
@@ -59,14 +61,14 @@ public class Worm {
 		if (dir == UP) {
 			allBody[0].y = tmpY + SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].y + SIZE > screenHeight * SIZE - SIZE * 2) {
+			if (allBody[0].y + SIZE > tileHeight * SIZE - SIZE * 2) {
 				tmpY = 0;
 				allBody[0].y = tmpY;
 			}
 		} else if (dir == RIGHT) {
 			allBody[0].x = tmpX + SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].x + SIZE > screenWidth * SIZE) {
+			if (allBody[0].x + SIZE > tileWidth * SIZE) {
 				tmpX = 0;
 				allBody[0].x = tmpX;
 			}
@@ -74,14 +76,14 @@ public class Worm {
 			allBody[0].y = tmpY - SIZE;
 			// If it's out of bounds, wrap around.
 			if (allBody[0].y < 0) {
-				tmpY = screenHeight * SIZE - SIZE * 3;
+				tmpY = tileHeight * SIZE - SIZE * 3;
 				allBody[0].y = tmpY;
 			}
 		} else {
 			allBody[0].x = tmpX - SIZE;
 			// If it's out of bounds, wrap around.
 			if (allBody[0].x < 0) {
-				tmpX = screenWidth * SIZE - SIZE;
+				tmpX = tileWidth * SIZE - SIZE;
 				allBody[0].x = tmpX;
 			}
 		}
@@ -106,12 +108,12 @@ public class Worm {
 		}
 	}
 
-	public void goRight () {
+	public void turnRight () {
 		dir++;
 		if (dir > LEFT) dir = UP;
 	}
 
-	public void goLeft () {
+	public void turnLeft () {
 		dir--;
 		if (dir < UP) dir = LEFT;
 	}
@@ -139,6 +141,22 @@ public class Worm {
 
 	public Vector2Marked[] getAllBody () {
 		return allBody;
+	}
+
+	public Vector2Marked getBodySegment (int segment) {
+		return allBody[segment];
+	}
+
+	public Vector2Marked getHead () {
+		return allBody[0];
+	}
+
+	public int getHeadIntX () {
+		return (int)allBody[0].x;
+	}
+
+	public int getHeadIntY () {
+		return (int)allBody[0].y;
 	}
 
 	public int getBodyLength () {
