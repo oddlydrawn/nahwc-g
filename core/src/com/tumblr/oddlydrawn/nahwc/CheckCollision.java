@@ -52,6 +52,7 @@ public class CheckCollision {
 	public boolean wormAndWorm () {
 		updateHead();
 		bodyLength = worm.getBodyLength();
+		// head is zero
 		for (int i = 1; i < bodyLength; i++) {
 			bodySegment = worm.getBodySegment(i);
 			body.x = bodySegment.x;
@@ -88,9 +89,9 @@ public class CheckCollision {
 			foodRect = foodList.get(i);
 			if (foodRect.overlaps(testRect)) return true;
 		}
+
 		tmpX = (int)testRect.x;
 		tmpY = (int)testRect.y;
-
 		if (wallCollidesWith(tmpX, tmpY)) return true;
 
 		bodyLength = worm.getBodyLength();

@@ -28,6 +28,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -44,8 +45,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
@@ -81,6 +85,16 @@ public class MainMenuScreen implements Screen {
 	int levelNumber = 0;
 	int fasterSpeed = 0;
 
+	final String TEXTURE_ATLAS_LOC = "data/pack.atlas";
+	final String CHECKED_REGION_STRING = "checked";
+	final String UNCHECKED_REGION_STRING = "unchecked";
+	final String BACKGROUN_REGION_STRING = "background";
+	final String KNOB_REGION_STRING = "knob";
+	final String TITLE_REGION_STRING = "nahwc_title";
+	final String PATCH_BOX_REGION_STRING = "box";
+	final float TITLE_SPRITE_POS_X = -128;
+	final float TITLE_SPRITE_POS_Y = 80;
+
 	public MainMenuScreen (Game g) {
 		cam = new OrthographicCamera(WIDTH, HEIGHT);
 		game = g;
@@ -88,14 +102,18 @@ public class MainMenuScreen implements Screen {
 		titleSprite = new Sprite();
 		stage = new Stage();
 		skin = new Skin();
-		atlas = new TextureAtlas(Gdx.files.internal("data/pack.atlas"));
-		AtlasRegion checked = atlas.findRegion("checked");
-		AtlasRegion unchecked = atlas.findRegion("unchecked");
-		AtlasRegion background = atlas.findRegion("background");
-		AtlasRegion knob = atlas.findRegion("knob");
-		titleSprite = atlas.createSprite("nahwc_title");
-		titleSprite.setX(-128);
-		titleSprite.setY(80);
+		atlas = new TextureAtlas(Gdx.files.internal(TEXTURE_ATLAS_LOC));
+		AtlasRegion checked = atlas.findRegion(CHECKED_REGION_STRING);
+		AtlasRegion unchecked = atlas.findRegion(UNCHECKED_REGION_STRING);
+		AtlasRegion background = atlas.findRegion(BACKGROUN_REGION_STRING);
+		AtlasRegion knob = atlas.findRegion(KNOB_REGION_STRING);
+		titleSprite = atlas.createSprite(TITLE_REGION_STRING);
+		titleSprite.setX(TITLE_SPRITE_POS_X);
+		titleSprite.setY(TITLE_SPRITE_POS_Y);
+
+		NinePatch patchBox;
+		patchBox = new NinePatch(atlas.createPatch(PATCH_BOX_REGION_STRING));
+
 		batch.setProjectionMatrix(cam.combined);
 
 		Gdx.input.setInputProcessor(stage);
@@ -131,6 +149,11 @@ public class MainMenuScreen implements Screen {
 
 		ButtonStyle buttonStyle = new ButtonStyle();
 		skin.add("default", buttonStyle);
+
+		TextButtonStyle textButtonStyle = new TextButtonStyle();
+		textButtonStyle.font = skin.getFont("default");
+		textButtonStyle.up = new NinePatchDrawable(patchBox);
+		skin.add("default", textButtonStyle);
 
 		final CheckBox faster = new CheckBox(LABEL_FASTER, skin);
 		table.add(faster).align(Align.left);
@@ -175,14 +198,12 @@ public class MainMenuScreen implements Screen {
 		stage.addActor(levelSlider);
 
 		table.row();
-		Button start = new Button(skin);
-		start.add("Start");
-		start.setPosition(240, 50);
+		TextButton start = new TextButton("Start", skin);
+		start.setPosition(210, 36);
 		stage.addActor(start);
 
-		Button license = new Button(skin);
-		license.add("License");
-		license.setPosition(240, 20);
+		TextButton license = new TextButton("License", skin);
+		license.setPosition(205, 2);
 		stage.addActor(license);
 
 		fasterLabel.setY(215);

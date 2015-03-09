@@ -28,6 +28,10 @@ public class Worm {
 	private Vector2Marked[] allBody = new Vector2Marked[WORM_MAX_SIZE];
 	private float tmpX;
 	private float tmpY;
+	private float headX;
+	private float headY;
+	private float verticalLevelBounds;
+	private float horizontalLevelBounds;
 	private int dir;
 	private int tileWidth;
 	private int tileHeight;
@@ -48,6 +52,11 @@ public class Worm {
 		originalLength = wormLength;
 		tileWidth = Level.TILES_WIDTH;
 		tileHeight = Level.TILES_HEIGHT;
+
+		// subtract 2 * SIZE is the padding space for font
+		// the other subtracted size is the height/width of the head
+		verticalLevelBounds = tileHeight * SIZE - SIZE * 3;
+		horizontalLevelBounds = tileWidth * SIZE - SIZE;
 	}
 
 	public void update () {
@@ -56,37 +65,35 @@ public class Worm {
 		updateBody();
 
 		// Moves the head. [0] is the head.
-		tmpX = allBody[0].x;
-		tmpY = allBody[0].y;
+		headX = getHeadX();
+		headY = getHeadY();
 		if (dir == UP) {
-			allBody[0].y = tmpY + SIZE;
+			headY += SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].y + SIZE > tileHeight * SIZE - SIZE * 2) {
-				tmpY = 0;
-				allBody[0].y = tmpY;
+			if (headY > verticalLevelBounds) {
+				headY = 0;
 			}
 		} else if (dir == RIGHT) {
-			allBody[0].x = tmpX + SIZE;
+			headX += SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].x + SIZE > tileWidth * SIZE) {
-				tmpX = 0;
-				allBody[0].x = tmpX;
+			if (headX > horizontalLevelBounds) {
+				headX = 0;
 			}
 		} else if (dir == DOWN) {
-			allBody[0].y = tmpY - SIZE;
+			headY -= SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].y < 0) {
-				tmpY = tileHeight * SIZE - SIZE * 3;
-				allBody[0].y = tmpY;
+			if (headY < 0) {
+				headY = verticalLevelBounds;
 			}
 		} else {
-			allBody[0].x = tmpX - SIZE;
+			headX -= SIZE;
 			// If it's out of bounds, wrap around.
-			if (allBody[0].x < 0) {
-				tmpX = tileWidth * SIZE - SIZE;
-				allBody[0].x = tmpX;
+			if (headX < 0) {
+				headX = horizontalLevelBounds;
 			}
 		}
+		setHeadX(headX);
+		setHeadY(headY);
 	}
 
 	// Works from the tail to the head, gives last tail bit second-to-the-last's
@@ -157,6 +164,22 @@ public class Worm {
 
 	public int getHeadIntY () {
 		return (int)allBody[0].y;
+	}
+
+	private float getHeadX () {
+		return allBody[0].x;
+	}
+
+	private float getHeadY () {
+		return allBody[0].y;
+	}
+
+	private void setHeadX (float x) {
+		allBody[0].x = x;
+	}
+
+	private void setHeadY (float y) {
+		allBody[0].y = y;
 	}
 
 	public int getBodyLength () {

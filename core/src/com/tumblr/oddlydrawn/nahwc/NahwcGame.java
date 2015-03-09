@@ -26,7 +26,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
 
 /** @author oddlydrawn */
-public class God {
+public class NahwcGame {
 	private final String SCORES_STRING = "scores";
 	private final String NO_FAST_STRING = "noFast";
 	private final String FILE_EXT = ".txt";
@@ -47,7 +47,7 @@ public class God {
 	private final int SCREEN_WIDTH_TILES = 59;
 	private final int SCREEN_HEIGHT_TILES = 39;
 	private final int TEXT_PADDING = 2;
-	private float updateSpeed = 0.2f; // 0.2f
+	private float timeToUpdate = 0.2f; // 0.2f
 	private OrthographicCamera cam;
 	private Renderer renderer;
 	private Rectangle bounds;
@@ -61,17 +61,17 @@ public class God {
 	private String scoreString;
 	private Controller controller;
 	private String scoresFile;
-	private float timer;
+	private float timeSinceLastUpdate;
 	private float delta;
 	private float startX;
 	private float startY;
 	private float animSize;
 	private float decreaseSpeed;
-	private float stateTime;
+	private float timeToStartGame;
 	private float halfUpdate;
 	private int counter;
 	private int score;
-	private int highScore;
+	private int hiScore;
 	private int tmpScore;
 	private int levelNumber;
 	private int fasterSpeed;
@@ -84,7 +84,94 @@ public class God {
 	private boolean isPermOutline;
 	private boolean startGame = false;
 
-	public God () {
+	public NahwcGame () {
+		loadPreferences();
+		loadScore();
+		loadLevel();
+		createObjects();
+	}
+
+	public void runGame () {
+		Gdx.gl.glClearColor(0, 0, 0.1f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
+			saveScore();
+			Gdx.app.exit();
+		}
+
+		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
+		timeSinceLastUpdate += delta;
+
+		renderer.update(animSize);
+		cam.update();
+
+		// Gets current score (worm size - original worm size).
+		score = worm.getScore();
+		if (score > hiScore) hiScore = score;
+
+		renderer.setHiScore(hiScore);
+
+		if (startGame) {
+			// Pauses time between worm movement.
+			if (timeSinceLastUpdate > timeToUpdate) {
+				controller.update();
+				worm.update();
+				timeSinceLastUpdate = 0;
+				if (counter <= 2) counter++;
+				// Checking for collisions has to happen after worm head is off body
+				if (counter > 2) {
+					if (collision.wormAndWall() || collision.wormAndWorm()) {
+						Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+						saveScore();
+						gameOver = true;
+					}
+				}
+			}
+
+			calculateAnimationSize();
+			controller.processInput();
+			checkWormAndFoodCollision();
+		} else {
+			timeToStartGame += delta;
+			if (timeToStartGame > START_TIME) startGame = true;
+		}
+	}
+
+	private void calculateAnimationSize () {
+		halfUpdate = timeToUpdate / 2;
+		if (timeSinceLastUpdate < halfUpdate) {
+			// A formula for scale in relation to time (8 to 16 for first half
+			// of a pause between worm timeToUpdate updates).
+			animSize = WORM_SIZE_PX * timeSinceLastUpdate + Level.SIZE;
+		} else if (timeSinceLastUpdate > halfUpdate) {
+			// This shrinks the scale for the second half of the worm update.
+			animSize = -WORM_SIZE_PX * timeSinceLastUpdate + Level.SIZE * 3;
+		} else {
+			animSize = 0;
+		}
+	}
+
+	private void checkWormAndFoodCollision () {
+		if (collision.wormAndFood()) {
+			if (isSound) musicPlayer.playPickup();
+			if (isAnimate) worm.markHead();
+			worm.bodyPlusPlus();
+			makeNewFood();
+			score = worm.getScore();
+			// XXX Score is 1 less than actual score.
+			tmpScore = score + 1;
+			if (isFaster) timeToUpdate -= decreaseSpeed;
+			if (isColor) {
+				if (tmpScore % COLOR_MULTIPLE == 0) renderer.changeColor();
+			}
+			if (isOutline && !isPermOutline) {
+				if (tmpScore % OUTLINE_MULTIPLE == 0) renderer.changeOutline();
+			}
+		}
+	}
+
+	private void loadPreferences () {
 		// Loads the preferences saved from the MainMenuScreen.
 		String prefString;
 		FileHandle prefHandle;
@@ -122,7 +209,12 @@ public class God {
 			decreaseSpeed = UPDATE_SPEED_DECREASE_FIVE;
 		}
 
-		// Loads high score.
+		// Initital speed up
+		timeToUpdate -= 5 * decreaseSpeed;
+	}
+
+	private void loadScore () {
+		// Creates correct filename for scores file
 		FileHandle handle;
 		scoresFile = SCORES_STRING;
 		scoresFile += String.valueOf(levelNumber);
@@ -133,6 +225,7 @@ public class God {
 		}
 		scoresFile += FILE_EXT;
 
+		// Checks if scores file exists, creates one if not
 		if (Gdx.files.local(scoresFile).exists()) {
 			handle = Gdx.files.local(scoresFile);
 		} else {
@@ -140,18 +233,24 @@ public class God {
 			scoreString = Integer.toString(0);
 			handle.writeString(scoreString, false);
 		}
+
 		scoreString = handle.readString();
 		try {
-			highScore = Integer.parseInt(scoreString);
+			hiScore = Integer.parseInt(scoreString);
 		} catch (NumberFormatException e) {
-			highScore = 0;
+			hiScore = 0;
 		}
+	}
 
+	private void loadLevel () {
+		// Loads level based on selected level
 		level = new Level(levelNumber);
 		level.loadLevel();
 		startX = level.getStartCoords().x;
 		startY = level.getStartCoords().y;
+	}
 
+	private void createObjects () {
 		bounds = new Rectangle(startX, startY, Level.SIZE, Level.SIZE);
 		worm = new Worm(bounds, WORM_LENGTH);
 		cam = new OrthographicCamera();
@@ -173,84 +272,6 @@ public class God {
 		}
 	}
 
-	public void dispose () {
-		renderer.dispose();
-		musicPlayer.dispose();
-	}
-
-	public void runGame () {
-		Gdx.gl.glClearColor(0, 0, 0.1f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
-			saveScore();
-			Gdx.app.exit();
-		}
-
-		delta = Math.min(0.06f, Gdx.graphics.getDeltaTime());
-		timer += delta;
-
-		renderer.update(animSize);
-		cam.update();
-
-		// Gets current score (worm size - original worm size).
-		score = worm.getScore();
-		if (score > highScore) highScore = score;
-
-		renderer.setHiScore(highScore);
-
-		if (startGame) {
-			// Pauses time between worm movement.
-			if (timer > updateSpeed) {
-				controller.update();
-				worm.update();
-				timer = 0;
-				if (counter < 50) counter++;
-				// Checking for collisions has to happen after worm head is off body
-				if (counter > 2) {
-					if (collision.wormAndWall() || collision.wormAndWorm()) {
-						Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-						saveScore();
-						gameOver = true;
-					}
-				}
-			}
-
-			halfUpdate = updateSpeed / 2;
-			if (timer < halfUpdate) {
-				// A formula for scale in relation to time (8 to 16 for first half
-				// of a pause between worm updateSpeed updates).
-				animSize = WORM_SIZE_PX * timer + Level.SIZE;
-			} else if (timer > halfUpdate) {
-				// This shrinks the scale for the second half of the worm update.
-				animSize = -WORM_SIZE_PX * timer + Level.SIZE * 3;
-			} else {
-				animSize = 0;
-			}
-
-			controller.processInput();
-			if (collision.wormAndFood()) {
-				if (isSound) musicPlayer.playPickup();
-				if (isAnimate) worm.markHead();
-				worm.bodyPlusPlus();
-				makeNewFood();
-				score = worm.getScore();
-				// XXX Score is 1 less than actual score.
-				tmpScore = score + 1;
-				if (isFaster) updateSpeed -= decreaseSpeed;
-				if (isColor) {
-					if (tmpScore % COLOR_MULTIPLE == 0) renderer.changeColor();
-				}
-				if (isOutline && !isPermOutline) {
-					if (tmpScore % OUTLINE_MULTIPLE == 0) renderer.changeOutline();
-				}
-			}
-		} else {
-			stateTime += delta;
-			if (stateTime > START_TIME) startGame = true;
-		}
-	}
-
 	public void makeInitialFood () {
 		do {
 			testRect.x = rnd.nextInt(SCREEN_WIDTH_TILES) * Level.SIZE;
@@ -269,11 +290,16 @@ public class God {
 
 	public void saveScore () {
 		FileHandle handle = Gdx.files.local(scoresFile);
-		scoreString = Integer.toString(highScore);
+		scoreString = Integer.toString(hiScore);
 		handle.writeString(scoreString, false);
 	}
 
 	public boolean getIfGameOver () {
 		return gameOver;
+	}
+
+	public void dispose () {
+		renderer.dispose();
+		musicPlayer.dispose();
 	}
 }

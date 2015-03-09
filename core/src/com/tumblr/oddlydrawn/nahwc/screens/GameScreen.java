@@ -18,24 +18,24 @@ package com.tumblr.oddlydrawn.nahwc.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
-import com.tumblr.oddlydrawn.nahwc.God;
+import com.tumblr.oddlydrawn.nahwc.NahwcGame;
 
 /** @author oddlydrawn */
 public class GameScreen implements Screen {
 	Game game;
-	God god;
+	NahwcGame nahwcGame;
 
 	public GameScreen (Game g) {
 		game = g;
-		god = new God();
+		nahwcGame = new NahwcGame();
 	}
 
 	@Override
 	public void render (float delta) {
-		if (god.getIfGameOver() == false) {
-			god.runGame();
+		if (nahwcGame.getIfGameOver() == false) {
+			nahwcGame.runGame();
 		} else {
-			god.dispose();
+			nahwcGame.dispose();
 			game.setScreen(new MainMenuScreen(game));
 		}
 	}

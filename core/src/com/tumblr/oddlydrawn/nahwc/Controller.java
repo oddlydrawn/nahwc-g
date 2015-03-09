@@ -30,8 +30,8 @@ public class Controller {
 	int screenWidthPx;
 	boolean letGo;
 
-	public Controller (Worm w) {
-		worm = w;
+	public Controller (Worm worm) {
+		this.worm = worm;
 		screenWidthPx = Gdx.graphics.getWidth();
 		letGo = true;
 	}
@@ -45,11 +45,10 @@ public class Controller {
 	public void processInput () {
 		inputX = Gdx.input.getX();
 
-		// If half of the screen is touched or right key, same for left.
-		if (Gdx.input.isKeyPressed(Keys.RIGHT) || (rightTouched())) {
+		if (pressedRight()) {
 			if (letGo) dir = RIGHT;
 			letGo = false;
-		} else if (Gdx.input.isKeyPressed(Keys.LEFT) || (leftTouched())) {
+		} else if (pressedLeft()) {
 			if (letGo) dir = LEFT;
 			letGo = false;
 		} else {
@@ -57,12 +56,15 @@ public class Controller {
 		}
 	}
 
-	public boolean rightTouched () {
+	public boolean pressedRight () {
+		// If right half of the screen is touched or right key, same for left.
+		if (Gdx.input.isKeyPressed(Keys.RIGHT)) return true;
 		if (Gdx.input.isTouched() && inputX > screenWidthPx / 2) return true;
 		return false;
 	}
 
-	public boolean leftTouched () {
+	public boolean pressedLeft () {
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) return true;
 		if (Gdx.input.isTouched() && inputX <= screenWidthPx / 2) return true;
 		return false;
 	}

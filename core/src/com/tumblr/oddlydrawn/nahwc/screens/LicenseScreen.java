@@ -26,7 +26,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -35,24 +37,30 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 /** @author oddlydrawn */
 public class LicenseScreen implements Screen {
-	final String LABEL_PADDING = " \n";
+	final String TEXTURE_ATLAS_LOC = "data/pack.atlas";
+	final String LABEL_PADDING = " ";
 	final String FONT_LOC = "data/font/fine_print.fnt";
 	final String LICENSE_LOC = "data/LICENSE-2.0.txt";
+	final String PATCH_BOX_REGION_STRING = "box";
 	final float WIDTH = 480;
 	final float HEIGHT = 320;
-	final float TABLE_PADDING = 20f;
+	final float TABLE_PADDING = 5f;
 	String licenseString = "mew";
 	Stage stage;
 	Skin skin;
 	SpriteBatch batch;
 	Game game;
+	TextureAtlas atlas;
 
 	public LicenseScreen (Game g) {
 		game = g;
@@ -62,6 +70,11 @@ public class LicenseScreen implements Screen {
 		FileHandle handle;
 		handle = Gdx.files.internal(LICENSE_LOC);
 		licenseString = handle.readString();
+
+		atlas = new TextureAtlas(Gdx.files.internal(TEXTURE_ATLAS_LOC));
+
+		NinePatch patchBox;
+		patchBox = new NinePatch(atlas.createPatch(PATCH_BOX_REGION_STRING));
 
 		Gdx.input.setInputProcessor(stage);
 		stage.setViewport(new StretchViewport(WIDTH, HEIGHT));
@@ -87,6 +100,11 @@ public class LicenseScreen implements Screen {
 		ButtonStyle buttonStyle = new ButtonStyle();
 		skin.add("default", buttonStyle);
 
+		TextButtonStyle textButtonStyle = new TextButtonStyle();
+		textButtonStyle.font = skin.getFont("default");
+		textButtonStyle.up = new NinePatchDrawable(patchBox);
+		skin.add("default", textButtonStyle);
+
 		// Creates Actors (the entire LICENSE text file) for Scene2D
 		Label license = new Label(licenseString, skin);
 		ScrollPane scrollPane = new ScrollPane(license, skin);
@@ -95,13 +113,12 @@ public class LicenseScreen implements Screen {
 
 		// Creates the padding between the text and the button.
 		table.row();
-		Label padding = new Label(LABEL_PADDING, skin);
-		table.add(padding);
+// Label padding = new Label(LABEL_PADDING, skin);
+// table.add(padding);
 
 		// Creates the 'Okay' button
 		table.row();
-		Button okay = new Button(skin);
-		okay.add("Okay");
+		TextButton okay = new TextButton("Okay", skin);
 		table.add(okay);
 		okay.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
