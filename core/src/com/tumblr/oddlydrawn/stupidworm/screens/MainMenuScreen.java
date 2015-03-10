@@ -335,7 +335,7 @@ public class MainMenuScreen implements Screen {
 			hiScore = allScores[levelNumber][fasterSpeed];
 		} else {
 //			System.out.println(allScores[SavedStuff.NUMBER_OF_LEVELS - 1][fasterSpeed]);	
-			hiScore = allScores[SavedStuff.NUMBER_OF_LEVELS - 1][fasterSpeed];	
+			hiScore = allScores[levelNumber][SavedStuff.NUMBER_OF_SPEEDS - 1];	
 		}
 		hiScoreBuilder.append(hiScore);
 		highScoreString = hiScoreBuilder.toString();
