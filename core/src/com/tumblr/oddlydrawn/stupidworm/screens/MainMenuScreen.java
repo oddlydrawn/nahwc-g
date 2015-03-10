@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package com.tumblr.oddlydrawn.nahwc.screens;
+package com.tumblr.oddlydrawn.stupidworm.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -52,7 +52,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.tumblr.oddlydrawn.nahwc.SavedStuff;
+import com.tumblr.oddlydrawn.stupidworm.SavedStuff;
 
 /** @author oddlydrawn */
 public class MainMenuScreen implements Screen {
@@ -390,6 +390,7 @@ public class MainMenuScreen implements Screen {
 		isOutline = savedStuff.isOutline();
 		isPermOutline = savedStuff.isPermOutline();
 		levelNumber = savedStuff.getLevelNumber();
+		fasterSpeed = savedStuff.getFasterSpeed();
 		
 		savedStuff.loadAllScoresIntoArray();
 		allScores = savedStuff.getAllScores();
@@ -397,6 +398,8 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void hide () {
+		setPreferences();
+		savePreferences();
 	}
 	
 	public void setPreferences() {
@@ -416,8 +419,6 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void pause () {
-		setPreferences();
-		savePreferences();
 	}
 
 	@Override

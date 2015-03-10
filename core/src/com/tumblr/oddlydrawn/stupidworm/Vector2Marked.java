@@ -14,25 +14,36 @@
  *   limitations under the License.
  */
 
-package com.tumblr.oddlydrawn.nahwc;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
+package com.tumblr.oddlydrawn.stupidworm;
 
 /** @author oddlydrawn */
-public class MyMusic {
-	private float volume = 1.0f;
-	Sound soundPickup;
+public class Vector2Marked {
+	public float x;
+	public float y;
+	private boolean marked = false;
 
-	public MyMusic () {
-		soundPickup = Gdx.audio.newSound(Gdx.files.internal("data/sound/pickup.wav"));
+	public Vector2Marked () {
 	}
 
-	public void playPickup () {
-		soundPickup.play(volume);
+	public Vector2Marked (float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 
-	public void dispose () {
-		soundPickup.dispose();
+	public boolean getMarked () {
+		return marked;
+	}
+
+	public void setMarked () {
+		marked = true;
+	}
+
+	public void removeMarked () {
+		marked = false;
+	}
+
+	public void set (float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 }

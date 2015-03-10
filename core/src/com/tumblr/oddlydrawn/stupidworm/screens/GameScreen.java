@@ -14,11 +14,11 @@
  *   limitations under the License.
  */
 
-package com.tumblr.oddlydrawn.nahwc.screens;
+package com.tumblr.oddlydrawn.stupidworm.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
-import com.tumblr.oddlydrawn.nahwc.NahwcGame;
+import com.tumblr.oddlydrawn.stupidworm.NahwcGame;
 
 /** @author oddlydrawn */
 public class GameScreen implements Screen {

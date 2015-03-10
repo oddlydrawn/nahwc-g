@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package com.tumblr.oddlydrawn.nahwc;
+package com.tumblr.oddlydrawn.stupidworm;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;

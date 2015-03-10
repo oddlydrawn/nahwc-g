@@ -1,8 +1,8 @@
-package com.tumblr.oddlydrawn.nahwc;
+package com.tumblr.oddlydrawn.stupidworm;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.tumblr.oddlydrawn.nahwc.screens.MainMenuScreen;
+import com.tumblr.oddlydrawn.stupidworm.screens.MainMenuScreen;
 
 public class SavedStuff {
 	private final float UPDATE_SPEED_DECREASE_ZERO = 0.0003125f; // 0.0003125f
@@ -85,6 +85,7 @@ public class SavedStuff {
 				allScores[levelNumber][fasterSpeed] = hiScore;
 			}
 		}	
+		loadPreferencesAndScore();
 	}
 	
 	private void printAllScores () {

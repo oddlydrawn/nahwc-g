@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package com.tumblr.oddlydrawn.nahwc.screens;
+package com.tumblr.oddlydrawn.stupidworm.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;

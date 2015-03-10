@@ -1,10 +1,10 @@
-package com.tumblr.oddlydrawn.nahwc.android;
+package com.tumblr.oddlydrawn.stupidworm;
 
 import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.tumblr.oddlydrawn.nahwc.MyGdxGame;
+import com.tumblr.oddlydrawn.stupidworm.MyGdxGame;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

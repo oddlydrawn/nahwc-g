@@ -1,8 +1,8 @@
 
-package com.tumblr.oddlydrawn.nahwc;
+package com.tumblr.oddlydrawn.stupidworm;
 
 import com.badlogic.gdx.Game;
-import com.tumblr.oddlydrawn.nahwc.screens.MainMenuScreen;
+import com.tumblr.oddlydrawn.stupidworm.screens.MainMenuScreen;
 
 public class MyGdxGame extends Game {
 

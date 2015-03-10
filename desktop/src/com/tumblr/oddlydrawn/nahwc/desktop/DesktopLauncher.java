@@ -2,7 +2,7 @@ package com.tumblr.oddlydrawn.nahwc.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.tumblr.oddlydrawn.nahwc.MyGdxGame;
+import com.tumblr.oddlydrawn.stupidworm.MyGdxGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
