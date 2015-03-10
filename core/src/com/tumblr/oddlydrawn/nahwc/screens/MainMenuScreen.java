@@ -430,5 +430,6 @@ public class MainMenuScreen implements Screen {
 		stage.dispose();
 		atlas.dispose();
 		skin.dispose();
+		font.dispose();
 	}
 }

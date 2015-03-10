@@ -50,7 +50,7 @@ public class SavedStuff {
 			for(int y = 0; y < NUMBER_OF_SPEEDS; y++) {
 				levelNumber = x;
 				fasterSpeed = y;
-				if (levelNumber == NUMBER_OF_SPEEDS - 1) {
+				if (fasterSpeed == NUMBER_OF_SPEEDS - 1) {
 					isFaster = false;
 				} else {
 					isFaster = true;
