@@ -27,7 +27,6 @@ public class SavedStuff {
 	private boolean isColor;
 	private boolean isAnimate;
 	private boolean isSound;
-	private boolean gameOver;
 	private boolean isOutline;
 	private boolean isPermOutline;
 	
@@ -36,14 +35,67 @@ public class SavedStuff {
 	}
 	
 	private int[][] allScores;
-	public static int NUMBER_OF_SPEEDS = 7;
 	public static int NUMBER_OF_LEVELS = 6;
-	
+	public static int NUMBER_OF_SPEEDS = 7;
+
 	public void loadAllScoresIntoArray () {
 		allScores = new int[NUMBER_OF_LEVELS][NUMBER_OF_SPEEDS];
 		
+
+		// Creates correct filename for scores file
 		FileHandle handle;
-		StringBuffer stringBuffer = new StringBuffer(SCORES_STRING);
+		StringBuilder scoresFileBuilder = new StringBuilder();
+		
+		for(int x = 0; x < NUMBER_OF_LEVELS; x++) {
+			for(int y = 0; y < NUMBER_OF_SPEEDS; y++) {
+				levelNumber = x;
+				fasterSpeed = y;
+				if (levelNumber == NUMBER_OF_SPEEDS - 1) {
+					isFaster = false;
+				} else {
+					isFaster = true;
+				}
+				
+				scoresFileBuilder.setLength(0);
+				scoresFileBuilder.append(SCORES_STRING);
+				scoresFileBuilder.append(String.valueOf(levelNumber));
+				if (isFaster) {
+					scoresFileBuilder.append(String.valueOf(fasterSpeed));
+				} else {
+					scoresFileBuilder.append(NO_FAST_STRING);
+				}
+				scoresFileBuilder.append(FILE_EXT);
+				scoresFile = scoresFileBuilder.toString();
+
+				// Checks if scores file exists, creates one if not
+				if (Gdx.files.local(scoresFile).exists()) {
+					handle = Gdx.files.local(scoresFile);
+				} else {
+					handle = Gdx.files.local(scoresFile);
+					scoreString = Integer.toString(0);
+					handle.writeString(scoreString, false);
+				}
+
+				scoreString = handle.readString();
+				try {
+					hiScore = Integer.parseInt(scoreString);
+				} catch (NumberFormatException e) {
+					hiScore = 0;
+				}
+				allScores[levelNumber][fasterSpeed] = hiScore;
+			}
+		}	
+	}
+	
+	private void printAllScores () {
+		for(int x = 0; x < NUMBER_OF_LEVELS; x++) {
+			for(int y = 0; y < NUMBER_OF_SPEEDS; y++) {
+				levelNumber = x;
+				fasterSpeed = y;
+				System.out.print("  " + allScores[levelNumber][fasterSpeed]);
+			}
+			System.out.println();
+		}
 	}
 	
 	public void loadPreferencesAndScore() {
@@ -175,6 +227,10 @@ public class SavedStuff {
 		FileHandle handle = Gdx.files.local(PREFERENCES_FILENAME);
 		// Saves said preference string.
 		handle.writeString(prefString, false);
+	}
+
+	public int[][] getAllScores() {
+		return allScores;
 	}
 	
 	public int getLevelNumber () {

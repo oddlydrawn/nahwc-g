@@ -69,6 +69,7 @@ public class MainMenuScreen implements Screen {
 	final String LABEL_LEVEL_SELECT = "Level:";
 	final String LABEL_FASTER_SELECT = "Faster Speed:";
 	final String FINE_PRINT = "data/font/fine_print.fnt";
+	private final String FONT_LOC = "data/font/dfont.fnt";
 	Preferences prefs;
 	OrthographicCamera cam;
 	SpriteBatch batch;
@@ -91,7 +92,7 @@ public class MainMenuScreen implements Screen {
 	boolean isPermOutline = false;
 	int levelNumber = 0;
 	int fasterSpeed = 0;
-
+	private final String HI_SCORE_STRING = "HiScore: ";
 	final String TEXTURE_ATLAS_LOC = "data/pack.atlas";
 	final String CHECKED_REGION_STRING = "checked";
 	final String UNCHECKED_REGION_STRING = "unchecked";
@@ -106,8 +107,14 @@ public class MainMenuScreen implements Screen {
 	final String LEVEL_FIVE_REGION_STRING = "level5";
 	final float TITLE_SPRITE_POS_X = -128;
 	final float TITLE_SPRITE_POS_Y = 80;
+	private int[][] allScores;
+	private BitmapFont font;
+	TextureRegion levelPreviewRegion;
+	StringBuilder hiScoreBuilder;
+	String highScoreString;
 
 	public MainMenuScreen (Game g) {
+		hiScoreBuilder = new StringBuilder();
 		cam = new OrthographicCamera(WIDTH, HEIGHT);
 		game = g;
 		batch = new SpriteBatch();
@@ -149,6 +156,7 @@ public class MainMenuScreen implements Screen {
 		pixmap.fill();
 		skin.add("grey", new Texture(pixmap));
 		skin.add("default", new BitmapFont(Gdx.files.internal(FINE_PRINT)));
+		font = new BitmapFont(Gdx.files.internal(FONT_LOC));
 
 		LabelStyle labelStyle = new LabelStyle();
 		labelStyle.font = skin.getFont("default");
@@ -307,18 +315,36 @@ public class MainMenuScreen implements Screen {
 			}
 		});
 	}
-	TextureRegion levelPreviewRegion;
+
+	int hiScore;
+	
 	@Override
 	public void render (float delta) {
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
 		// 286, 134
 		batch.begin();
 		titleSprite.draw(batch);
 		drawLevelPreview();
+		
+		hiScoreBuilder.setLength(0);
+		hiScoreBuilder.append(HI_SCORE_STRING);
+		if (isFaster) {
+//			System.out.println(allScores[levelNumber][fasterSpeed]);	
+			hiScore = allScores[levelNumber][fasterSpeed];
+		} else {
+//			System.out.println(allScores[SavedStuff.NUMBER_OF_LEVELS - 1][fasterSpeed]);	
+			hiScore = allScores[SavedStuff.NUMBER_OF_LEVELS - 1][fasterSpeed];	
+		}
+		hiScoreBuilder.append(hiScore);
+		highScoreString = hiScoreBuilder.toString();
+		font.draw(batch, highScoreString, 50, 73);
+		
 		batch.end();
 		stage.act(delta);
 		stage.draw();
+
 	}
 
 	public void drawLevelPreview () {
@@ -364,10 +390,16 @@ public class MainMenuScreen implements Screen {
 		isOutline = savedStuff.isOutline();
 		isPermOutline = savedStuff.isPermOutline();
 		levelNumber = savedStuff.getLevelNumber();
+		
+		savedStuff.loadAllScoresIntoArray();
+		allScores = savedStuff.getAllScores();
 	}
 
 	@Override
 	public void hide () {
+	}
+	
+	public void setPreferences() {
 		savedStuff.setFaster(isFaster);
 		savedStuff.setColor(isColor);
 		savedStuff.setAnimate(isAnimate);
@@ -376,12 +408,16 @@ public class MainMenuScreen implements Screen {
 		savedStuff.setPermOutline(isPermOutline);
 		savedStuff.setFasterSpeed(fasterSpeed);
 		savedStuff.setLevelNumber(levelNumber);
-		
+	}
+	
+	public void savePreferences() {
 		savedStuff.savePreferences();
 	}
 
 	@Override
 	public void pause () {
+		setPreferences();
+		savePreferences();
 	}
 
 	@Override
