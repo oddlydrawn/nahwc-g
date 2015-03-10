@@ -33,9 +33,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
@@ -52,6 +52,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.tumblr.oddlydrawn.nahwc.SavedStuff;
 
 /** @author oddlydrawn */
 public class MainMenuScreen implements Screen {
@@ -73,9 +74,15 @@ public class MainMenuScreen implements Screen {
 	SpriteBatch batch;
 	Game game;
 	Sprite titleSprite;
+	TextureRegion levelOnePreviewRegion;
+	TextureRegion levelTwoPreviewRegion;
+	TextureRegion levelThreePreviewRegion;
+	TextureRegion levelFourPreviewRegion;
+	TextureRegion levelFivePreviewRegion;
 	Stage stage;
 	Skin skin;
 	TextureAtlas atlas;
+	private SavedStuff savedStuff;
 	boolean isFaster = false;
 	boolean isColor = false;
 	boolean isSound = false;
@@ -92,6 +99,11 @@ public class MainMenuScreen implements Screen {
 	final String KNOB_REGION_STRING = "knob";
 	final String TITLE_REGION_STRING = "nahwc_title";
 	final String PATCH_BOX_REGION_STRING = "box";
+	final String LEVEL_ONE_REGION_STRING = "level1";
+	final String LEVEL_TWO_REGION_STRING = "level2";
+	final String LEVEL_THREE_REGION_STRING = "level3";
+	final String LEVEL_FOUR_REGION_STRING = "level4";
+	final String LEVEL_FIVE_REGION_STRING = "level5";
 	final float TITLE_SPRITE_POS_X = -128;
 	final float TITLE_SPRITE_POS_Y = 80;
 
@@ -103,14 +115,22 @@ public class MainMenuScreen implements Screen {
 		stage = new Stage();
 		skin = new Skin();
 		atlas = new TextureAtlas(Gdx.files.internal(TEXTURE_ATLAS_LOC));
+		
 		AtlasRegion checked = atlas.findRegion(CHECKED_REGION_STRING);
 		AtlasRegion unchecked = atlas.findRegion(UNCHECKED_REGION_STRING);
 		AtlasRegion background = atlas.findRegion(BACKGROUN_REGION_STRING);
 		AtlasRegion knob = atlas.findRegion(KNOB_REGION_STRING);
+		
 		titleSprite = atlas.createSprite(TITLE_REGION_STRING);
 		titleSprite.setX(TITLE_SPRITE_POS_X);
 		titleSprite.setY(TITLE_SPRITE_POS_Y);
-
+		
+		levelOnePreviewRegion = new TextureRegion(atlas.findRegion(LEVEL_ONE_REGION_STRING));
+		levelTwoPreviewRegion = new TextureRegion(atlas.findRegion(LEVEL_TWO_REGION_STRING));
+		levelThreePreviewRegion = new TextureRegion(atlas.findRegion(LEVEL_THREE_REGION_STRING));
+		levelFourPreviewRegion = new TextureRegion(atlas.findRegion(LEVEL_FOUR_REGION_STRING));
+		levelFivePreviewRegion = new TextureRegion(atlas.findRegion(LEVEL_FIVE_REGION_STRING));
+		
 		NinePatch patchBox;
 		patchBox = new NinePatch(atlas.createPatch(PATCH_BOX_REGION_STRING));
 
@@ -213,32 +233,7 @@ public class MainMenuScreen implements Screen {
 		levelSlider.setY(170);
 		table.setPosition(210, -40);
 
-		// Loads prefString, if they exist, or creates it
-		String prefString;
-		FileHandle handle;
-		if (Gdx.files.local("nahwc-prefs.txt").exists()) {
-			handle = Gdx.files.local("nahwc-prefs.txt");
-		} else {
-			handle = Gdx.files.local("nahwc-prefs.txt");
-			prefString = "00000000";
-			handle.writeString(prefString, false);
-		}
-		prefString = handle.readString();
-
-		// This is only useful for people that had an old version of the game
-		if (prefString.length() < 8) {
-			prefString = "00000000";
-		}
-
-		char one = '1';
-		isFaster = (one == prefString.charAt(0));
-		isColor = (one == prefString.charAt(1));
-		isAnimate = (one == prefString.charAt(2));
-		isSound = (one == prefString.charAt(3));
-		isOutline = (one == prefString.charAt(4));
-		isPermOutline = (one == prefString.charAt(5));
-		levelNumber = Character.getNumericValue(prefString.charAt(6));
-		fasterSpeed = Character.getNumericValue(prefString.charAt(7));
+		loadSavedStuff();
 
 		// If preferences were set, this ticks the checkboxes and sets the sliders
 		// to what they were saved
@@ -312,19 +307,42 @@ public class MainMenuScreen implements Screen {
 			}
 		});
 	}
-
+	TextureRegion levelPreviewRegion;
 	@Override
 	public void render (float delta) {
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+		// 286, 134
 		batch.begin();
 		titleSprite.draw(batch);
+		drawLevelPreview();
 		batch.end();
 		stage.act(delta);
 		stage.draw();
 	}
 
+	public void drawLevelPreview () {
+		switch (levelNumber) {
+		case 1:
+			batch.draw(levelOnePreviewRegion, 50, -27);
+			break;
+		case 2:
+			batch.draw(levelTwoPreviewRegion, 50, -27);
+			break;
+		case 3:
+			batch.draw(levelThreePreviewRegion, 50, -27);
+			break;
+		case 4:
+			batch.draw(levelFourPreviewRegion, 50, -27);
+			break;
+		case 5:
+			batch.draw(levelFivePreviewRegion, 50, -27);
+			break;
+		default:
+			break;
+		}
+	}
+	
 	@Override
 	public void resize (int width, int height) {
 		stage.getViewport().update(width, height, true);
@@ -333,51 +351,33 @@ public class MainMenuScreen implements Screen {
 	@Override
 	public void show () {
 	}
+	
+	public void loadSavedStuff () {
+		savedStuff = new SavedStuff();
+		savedStuff.loadPreferencesAndScore();
+		
+		levelNumber = savedStuff.getLevelNumber();
+		isFaster = savedStuff.isFaster();
+		isColor = savedStuff.isColor();
+		isAnimate = savedStuff.isAnimate();
+		isSound = savedStuff.isSound();
+		isOutline = savedStuff.isOutline();
+		isPermOutline = savedStuff.isPermOutline();
+		levelNumber = savedStuff.getLevelNumber();
+	}
 
 	@Override
 	public void hide () {
-		// Creates a string full of preferences.
-		String prefString = "";
-		FileHandle handle = Gdx.files.local("nahwc-prefs.txt");
-		if (isFaster) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-		if (isColor) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-		if (isAnimate) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-		if (isSound) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-		if (isOutline) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-		if (isPermOutline) {
-			prefString += "1";
-		} else {
-			prefString += "0";
-		}
-
-		String s;
-		s = String.valueOf(levelNumber);
-		prefString += s;
-		s = String.valueOf(fasterSpeed);
-		prefString += s;
-
-		// Saves said preference string.
-		handle.writeString(prefString, false);
+		savedStuff.setFaster(isFaster);
+		savedStuff.setColor(isColor);
+		savedStuff.setAnimate(isAnimate);
+		savedStuff.setSound(isSound);
+		savedStuff.setOutline(isOutline);
+		savedStuff.setPermOutline(isPermOutline);
+		savedStuff.setFasterSpeed(fasterSpeed);
+		savedStuff.setLevelNumber(levelNumber);
+		
+		savedStuff.savePreferences();
 	}
 
 	@Override

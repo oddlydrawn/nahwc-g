@@ -22,21 +22,20 @@ import com.badlogic.gdx.math.Rectangle;
 
 /** @author oddlydrawn */
 public class CheckCollision {
+	ArrayList<Rectangle> foodList;
+	Vector2Marked bodySegment;
+	Rectangle headRect;
+	Rectangle bodyRect;
+	Rectangle foodRect;
+	Level level;
 	Worm worm;
 	Food food;
-	Rectangle head;
-	Level level;
-	Rectangle bodyRect;
-	Rectangle body;
-	Vector2Marked bodySegment;
-	ArrayList<Rectangle> foodList;
-	Rectangle foodRect;
 	int[][] levelArray;
+	int bodyLength;
+	int levelTile;
+	int numFood;
 	int tmpX;
 	int tmpY;
-	int bodyLength;
-	int numFood;
-	int levelTile;
 
 	public CheckCollision (Food food, Worm worm, Level level) {
 		this.food = food;
@@ -52,14 +51,14 @@ public class CheckCollision {
 	public boolean wormAndWorm () {
 		updateHead();
 		bodyLength = worm.getBodyLength();
-		// head is zero
+		// headRect is zero
 		for (int i = 1; i < bodyLength; i++) {
 			bodySegment = worm.getBodySegment(i);
-			body.x = bodySegment.x;
-			body.y = bodySegment.y;
-			body.width = Level.SIZE;
-			body.height = Level.SIZE;
-			if (head.overlaps(body)) return true;
+			bodyRect.x = bodySegment.x;
+			bodyRect.y = bodySegment.y;
+			bodyRect.width = Level.SIZE;
+			bodyRect.height = Level.SIZE;
+			if (headRect.overlaps(bodyRect)) return true;
 		}
 		return false;
 	}
@@ -75,7 +74,7 @@ public class CheckCollision {
 		numFood = food.getNum();
 		for (int i = 0; i < numFood; i++) {
 			foodRect = foodList.get(i);
-			if (foodRect.overlaps(head)) {
+			if (foodRect.overlaps(headRect)) {
 				food.removeOne(i);
 				return true;
 			}
@@ -115,15 +114,14 @@ public class CheckCollision {
 	}
 
 	private void updateHead () {
-		head.x = worm.getHeadIntX();
-		head.y = worm.getHeadIntY();
+		headRect.x = worm.getHeadIntX();
+		headRect.y = worm.getHeadIntY();
 	}
 
 	public void setWorm (Worm w) {
 		tmpX = w.getHeadIntX();
 		tmpY = w.getHeadIntY();
-		head = new Rectangle(tmpX, tmpY, Level.SIZE, Level.SIZE);
-		body = new Rectangle();
+		headRect = new Rectangle(tmpX, tmpY, Level.SIZE, Level.SIZE);
 	}
 
 	public void setLevel (Level level) {

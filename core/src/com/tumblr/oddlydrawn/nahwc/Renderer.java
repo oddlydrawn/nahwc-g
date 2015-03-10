@@ -20,6 +20,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -29,8 +30,8 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class Renderer {
 	private final String FONT_LOC = "data/font/dfont.fnt";
-	private final String SCORE = "Score: ";
-	private final String HI_SCORE = "HiScore: ";
+	private final String SCORE_STRING = "Score: ";
+	private final String HI_SCORE_STRING = "HiScore: ";
 	private final float HALF = 0.5f;
 	private final float DEFAULT_RED = 0.8f;
 	private final int SCORE_STRING_HEIGHT = 40;
@@ -83,6 +84,8 @@ public class Renderer {
 	}
 
 	public void update (float animSize) {
+		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		cam.update();
 		shapeRenderer.setProjectionMatrix(cam.combined);
 		if (filled) {
@@ -152,12 +155,12 @@ public class Renderer {
 		// Draws regular Score.
 		score = worm.getScore();
 		tmpString = Integer.toString(score);
-		font.draw(batch, SCORE, 0, scoreHeight);
+		font.draw(batch, SCORE_STRING, 0, scoreHeight);
 		font.draw(batch, tmpString, scoreNumberWidth, scoreHeight);
 
 		// Draws HiScore.
 		tmpString = Integer.toString(hiScore);
-		font.draw(batch, HI_SCORE, hiScoreWidth, scoreHeight);
+		font.draw(batch, HI_SCORE_STRING, hiScoreWidth, scoreHeight);
 		font.draw(batch, tmpString, scoreHiNumberWidth, scoreHeight);
 	}
 

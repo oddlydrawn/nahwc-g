@@ -27,15 +27,6 @@ import com.badlogic.gdx.math.Rectangle;
 
 /** @author oddlydrawn */
 public class NahwcGame {
-	private final String SCORES_STRING = "scores";
-	private final String NO_FAST_STRING = "noFast";
-	private final String FILE_EXT = ".txt";
-	private final float UPDATE_SPEED_DECREASE_ZERO = 0.0003125f; // 0.0003125f
-	private final float UPDATE_SPEED_DECREASE_ONE = 0.000625f; // 0.000625f
-	private final float UPDATE_SPEED_DECREASE_TWO = 0.00125f; // 0.00125f
-	private final float UPDATE_SPEED_DECREASE_THREE = 0.0025f; // 0.0025f
-	private final float UPDATE_SPEED_DECREASE_FOUR = 0.005f; // 0.005f
-	private final float UPDATE_SPEED_DECREASE_FIVE = 0.01f; // 0.01f
 	private final float SCREEN_WIDTH_PX = 480;
 	private final float SCREEN_HEIGHT_PX = 320;
 	private final float WORM_SIZE_PX = 80;
@@ -58,9 +49,7 @@ public class NahwcGame {
 	private Rectangle testRect;
 	private Level level;
 	private MyMusic musicPlayer;
-	private String scoreString;
 	private Controller controller;
-	private String scoresFile;
 	private float timeSinceLastUpdate;
 	private float delta;
 	private float startX;
@@ -69,12 +58,11 @@ public class NahwcGame {
 	private float decreaseSpeed;
 	private float timeToStartGame;
 	private float halfUpdate;
+	private int levelNumber;
 	private int counter;
 	private int score;
 	private int hiScore;
 	private int tmpScore;
-	private int levelNumber;
-	private int fasterSpeed;
 	private boolean isFaster;
 	private boolean isColor;
 	private boolean isAnimate;
@@ -83,20 +71,18 @@ public class NahwcGame {
 	private boolean isOutline;
 	private boolean isPermOutline;
 	private boolean startGame = false;
+	private SavedStuff savedStuff;
 
 	public NahwcGame () {
-		loadPreferences();
-		loadScore();
-		loadLevel();
-		createObjects();
+		init();
 	}
 
 	public void runGame () {
-		Gdx.gl.glClearColor(0, 0, 0.1f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
-			saveScore();
+			if (score > hiScore) {
+				hiScore = score;
+				savedStuff.saveScore(hiScore);
+			}
 			Gdx.app.exit();
 		}
 
@@ -123,7 +109,7 @@ public class NahwcGame {
 				if (counter > 2) {
 					if (collision.wormAndWall() || collision.wormAndWorm()) {
 						Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-						saveScore();
+						savedStuff.saveScore(hiScore);
 						gameOver = true;
 					}
 				}
@@ -171,86 +157,28 @@ public class NahwcGame {
 		}
 	}
 
-	private void loadPreferences () {
-		// Loads the preferences saved from the MainMenuScreen.
-		String prefString;
-		FileHandle prefHandle;
-		if (Gdx.files.local("nahwc-prefs.txt").exists()) {
-			prefHandle = Gdx.files.local("nahwc-prefs.txt");
-		} else {
-			prefHandle = Gdx.files.local("nahwc-prefs.txt");
-			prefString = "0000";
-			prefHandle.writeString(prefString, false);
-		}
-		prefString = prefHandle.readString();
-
-		char one = '1';
-		// True if character at string index is '1', false if '0'
-		isFaster = (one == prefString.charAt(0));
-		isColor = (one == prefString.charAt(1));
-		isAnimate = (one == prefString.charAt(2));
-		isSound = (one == prefString.charAt(3));
-		isOutline = (one == prefString.charAt(4));
-		isPermOutline = (one == prefString.charAt(5));
-		levelNumber = Character.getNumericValue(prefString.charAt(6));
-		fasterSpeed = Character.getNumericValue(prefString.charAt(7));
-
-		if (fasterSpeed == 0) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_ZERO;
-		} else if (fasterSpeed == 1) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_ONE;
-		} else if (fasterSpeed == 2) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_TWO;
-		} else if (fasterSpeed == 3) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_THREE;
-		} else if (fasterSpeed == 4) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_FOUR;
-		} else if (fasterSpeed == 5) {
-			decreaseSpeed = UPDATE_SPEED_DECREASE_FIVE;
-		}
-
-		// Initital speed up
-		timeToUpdate -= 5 * decreaseSpeed;
-	}
-
-	private void loadScore () {
-		// Creates correct filename for scores file
-		FileHandle handle;
-		scoresFile = SCORES_STRING;
-		scoresFile += String.valueOf(levelNumber);
-		if (isFaster) {
-			scoresFile += String.valueOf(fasterSpeed);
-		} else {
-			scoresFile += NO_FAST_STRING;
-		}
-		scoresFile += FILE_EXT;
-
-		// Checks if scores file exists, creates one if not
-		if (Gdx.files.local(scoresFile).exists()) {
-			handle = Gdx.files.local(scoresFile);
-		} else {
-			handle = Gdx.files.local(scoresFile);
-			scoreString = Integer.toString(0);
-			handle.writeString(scoreString, false);
-		}
-
-		scoreString = handle.readString();
-		try {
-			hiScore = Integer.parseInt(scoreString);
-		} catch (NumberFormatException e) {
-			hiScore = 0;
-		}
-	}
-
-	private void loadLevel () {
+	private void init () {
+		savedStuff = new SavedStuff();
+		savedStuff.loadPreferencesAndScore();
+		
+		levelNumber = savedStuff.getLevelNumber();
+		isFaster = savedStuff.isFaster();
+		isColor = savedStuff.isColor();
+		isAnimate = savedStuff.isAnimate();
+		isSound = savedStuff.isSound();
+		isOutline = savedStuff.isOutline();
+		isPermOutline = savedStuff.isPermOutline();
+		decreaseSpeed = savedStuff.getDecreaseSpeed();
+		timeToUpdate = savedStuff.getTimeToUpdate();
+		levelNumber = savedStuff.getLevelNumber();
+		hiScore = savedStuff.getHiScore();
+		
 		// Loads level based on selected level
 		level = new Level(levelNumber);
 		level.loadLevel();
 		startX = level.getStartCoords().x;
 		startY = level.getStartCoords().y;
-	}
-
-	private void createObjects () {
+		
 		bounds = new Rectangle(startX, startY, Level.SIZE, Level.SIZE);
 		worm = new Worm(bounds, WORM_LENGTH);
 		cam = new OrthographicCamera();
@@ -286,12 +214,6 @@ public class NahwcGame {
 			testRect.y = rnd.nextInt(SCREEN_HEIGHT_TILES - TEXT_PADDING) * Level.SIZE;
 		} while (collision.thisAndAll(testRect));
 		food.createOne(testRect.x, testRect.y, Level.SIZE);
-	}
-
-	public void saveScore () {
-		FileHandle handle = Gdx.files.local(scoresFile);
-		scoreString = Integer.toString(hiScore);
-		handle.writeString(scoreString, false);
 	}
 
 	public boolean getIfGameOver () {
