@@ -54,7 +54,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tumblr.oddlydrawn.stupidworm.Assets;
 import com.tumblr.oddlydrawn.stupidworm.SavedStuff;
-import com.tumblr.oddlydrawn.stupidworm.UserInterface;
+import com.tumblr.oddlydrawn.stupidworm.MainMenuInterface;
 
 /** @author oddlydrawn */
 public class MainMenuScreen implements Screen {
@@ -66,26 +66,26 @@ public class MainMenuScreen implements Screen {
 	Game game;
 	TextureRegion levelPreviewRegion;
 	Assets assets;
-	UserInterface userInterface;
+	MainMenuInterface userInterface;
 
 	public MainMenuScreen (Game game) {
 		this.game = game;
 		assets = new Assets();
 		assets.initMainMenu();
-		userInterface = new UserInterface();
-		userInterface.initMainMenu(game, assets);
+		userInterface = new MainMenuInterface();
+		userInterface.init(game, assets);
 	}
 	
 	@Override
 	public void render (float delta) {
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		userInterface.renderMainMenu(delta);
+		userInterface.render(delta);
 	}
 	
 	@Override
 	public void resize (int width, int height) {
-		userInterface.resizeMainMenu(width, height);
+		userInterface.resize(width, height);
 	}
 
 	@Override

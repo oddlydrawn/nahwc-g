@@ -52,7 +52,7 @@ import com.tumblr.oddlydrawn.stupidworm.screens.LoadingScreen;
 import com.tumblr.oddlydrawn.stupidworm.screens.MainMenuScreen;
 import com.tumblr.oddlydrawn.stupidworm.Assets;
 
-public class UserInterface {
+public class MainMenuInterface {
 	final String LABEL_FASTER = "Faster?";
 	final String LABEL_COLOR = "Color?";
 	final String LABEL_SOUND = "Sound?";
@@ -92,12 +92,13 @@ public class UserInterface {
 	NinePatch patchBox;
 	BitmapFont finePrint;
 	BitmapFont font;
+	Table table;
 	
-	public UserInterface () {
+	public MainMenuInterface () {
 		
 	}
 	
-	public void initMainMenu(Game game, Assets assets) {
+	public void init(Game game, Assets assets) {
 		hiScoreBuilder = new StringBuilder();
 		savedStuff = new SavedStuff();
 		skin = new Skin();
@@ -109,83 +110,28 @@ public class UserInterface {
 		batch.setProjectionMatrix(cam.combined);
 		this.game = game;
 		this.assets = assets;
+		
 		loadMainMenuAssets();
-		setUpGUI();
+		setUpSkin();
+		createTable();
+		createStageActors();
+		addStageActorsToStage();
+		setActorsToDefaults();
+		addListenersToActors();
 	}
 	
-	public void resizeMainMenu(int width, int height) {
-		stage.getViewport().update(width, height, true);
+	public void loadMainMenuAssets() {
+		checked = assets.getChecked();
+		unchecked = assets.getUnchecked();
+		background = assets.getBackground();
+		knob = assets.getKnob();
+		patchBox = assets.getPatchBox();
+		finePrint = assets.getFinePrint();
+		font = assets.getFont();
+		titleSprite = assets.getTitleSprite();
 	}
 	
-	public void updateMainMenu() {
-		
-	}
-	
-	public void hideMainMenu() {
-		setPreferences();
-		savePreferences();
-	}
-	
-	public void renderMainMenu(float delta) {
-		// 286, 134
-		batch.setProjectionMatrix(cam.combined);
-		batch.begin();
-		titleSprite.draw(batch);
-		setLevelPreview();
-		if (levelNumber != 0) {
-			batch.draw(levelPreviewRegion, 50, -27);
-		}
-		hiScoreBuilder.setLength(0);
-		hiScoreBuilder.append(HI_SCORE_STRING);
-		if (isFaster) {
-			hiScore = allScores[levelNumber][fasterSpeed];
-		} else {
-			hiScore = allScores[levelNumber][SavedStuff.NUMBER_OF_SPEEDS - 1];	
-		}
-		hiScoreBuilder.append(hiScore);
-		highScoreString = hiScoreBuilder.toString();
-		font.draw(batch, highScoreString, 50, 73);
-		
-		batch.end();
-		stage.act(delta);
-		stage.draw();
-	}
-	
-	public void setLevelPreview () {
-		switch (levelNumber) {
-		case 1:
-			levelPreviewRegion = assets.getLevelOnePreviewRegion();
-			break;
-		case 2:
-			levelPreviewRegion = assets.getLevelTwoPreviewRegion();
-			break;
-		case 3:
-			levelPreviewRegion = assets.getLevelThreePreviewRegion();
-			break;
-		case 4:
-			levelPreviewRegion = assets.getLevelFourPreviewRegion();
-			break;
-		case 5:
-			levelPreviewRegion = assets.getLevelFivePreviewRegion();
-			break;
-		default:
-			break;
-		}
-	}
-	
-	public void disposeMainMenu() {
-		batch.dispose();
-		stage.dispose();
-		skin.dispose();
-		font.dispose();
-	}
-	
-	private void setUpGUI() {
-		Table table = new Table();
-		table.setFillParent(true);
-		table.align(Align.left);
-		stage.addActor(table);
-
+	private void setUpSkin() {
 		Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
 		pixmap.setColor(Color.LIGHT_GRAY);
 		pixmap.fill();
@@ -218,65 +164,100 @@ public class UserInterface {
 		textButtonStyle.font = skin.getFont("default");
 		textButtonStyle.up = new NinePatchDrawable(patchBox);
 		skin.add("default", textButtonStyle);
+	}
+	
+	private void createTable() {
+		table = new Table();
+		table.setFillParent(true);
+		table.align(Align.left);
+		stage.addActor(table);
+	}
+	
+	CheckBox faster;
+	CheckBox color;
+	CheckBox animate;
+	CheckBox sound;
+	CheckBox outline;
+	CheckBox permOutline;
+	Slider fasterSlider;
+	Slider levelSlider;
+	TextButton start;
+	TextButton license;
+	Label fasterLabel;
+	Label levelLabel;
+	
+	private void createStageActors() {
+		faster = new CheckBox(LABEL_FASTER, skin);
 
-		final CheckBox faster = new CheckBox(LABEL_FASTER, skin);
-		table.add(faster).align(Align.left);
+		color = new CheckBox(LABEL_COLOR, skin);
 
-		table.row();
-		final CheckBox color = new CheckBox(LABEL_COLOR, skin);
-		table.add(color).align(Align.left);
+		animate = new CheckBox(LABEL_ANIMATE, skin);
 
-		table.row();
-		final CheckBox animate = new CheckBox(LABEL_ANIMATE, skin);
-		table.add(animate).align(Align.left);
-
-		table.row();
-		final CheckBox sound = new CheckBox(LABEL_SOUND, skin);
-		table.add(sound).align(Align.left);
+		sound = new CheckBox(LABEL_SOUND, skin);
 		table.setPosition(210, 30);
 
-		table.row();
-		final CheckBox outline = new CheckBox(LABEL_OUTLINE, skin);
-		table.add(outline).align(Align.left);
+		outline = new CheckBox(LABEL_OUTLINE, skin);
 
-		table.row();
-		final CheckBox permOutline = new CheckBox(LABEL_PERM_OUTLINE, skin);
-		table.add(permOutline).align(Align.left);
+		permOutline = new CheckBox(LABEL_PERM_OUTLINE, skin);
 
-		Label fasterLabel = new Label(LABEL_FASTER_SELECT, skin);
+		fasterLabel = new Label(LABEL_FASTER_SELECT, skin);
 		fasterLabel.setPosition(240 - fasterLabel.getWidth() / 2, 115);
-		stage.addActor(fasterLabel);
 
-		final Slider fasterSlider = new Slider(0, 5, 1, false, skin);
+		fasterSlider = new Slider(0, 5, 1, false, skin);
 		fasterSlider.setWidth(outline.getWidth());
 		fasterSlider.setPosition(240 - fasterSlider.getWidth() / 2, 100);
-		stage.addActor(fasterSlider);
 
-		Label levelLabel = new Label(LABEL_LEVEL_SELECT, skin);
+		levelLabel = new Label(LABEL_LEVEL_SELECT, skin);
 		levelLabel.setPosition(240 - levelLabel.getWidth() / 2, 85);
-		stage.addActor(levelLabel);
 
-		final Slider levelSlider = new Slider(0, 5, 1, false, skin);
+		levelSlider = new Slider(0, 5, 1, false, skin);
 		levelSlider.setWidth(outline.getWidth());
 		levelSlider.setPosition(240 - levelSlider.getWidth() / 2, 70);
-		stage.addActor(levelSlider);
 
-		table.row();
-		TextButton start = new TextButton("Start", skin);
+		start = new TextButton("Start", skin);
 		start.setPosition(210, 36);
-		stage.addActor(start);
 
-		TextButton license = new TextButton("License", skin);
+		license = new TextButton("License", skin);
 		license.setPosition(205, 2);
-		stage.addActor(license);
 
 		fasterLabel.setY(215);
 		fasterSlider.setY(200);
 
 		levelLabel.setY(185);
 		levelSlider.setY(170);
-		table.setPosition(210, -40);
+	}
+	
+	private void addStageActorsToStage() {
+		table.add(faster).align(Align.left);
+
+		table.row();
+		table.add(color).align(Align.left);
+
+		table.row();
+		table.add(animate).align(Align.left);
+
+		table.row();
+		table.add(sound).align(Align.left);
+
+		table.row();
+		table.add(outline).align(Align.left);
+
+		table.row();
+		table.add(permOutline).align(Align.left);
+
+		stage.addActor(fasterLabel);
+		stage.addActor(fasterSlider);
+		stage.addActor(levelLabel);
+		stage.addActor(levelSlider);
+
+		table.row();
+		stage.addActor(start);
+		stage.addActor(license);
 		
+		table.setPosition(210, -40);
+	}
+	
+	private void setActorsToDefaults () {
 		loadSavedStuff();
 
 		// If preferences were set, this ticks the checkboxes and sets the sliders
@@ -290,7 +271,9 @@ public class UserInterface {
 		permOutline.setVisible(isOutline);
 		levelSlider.setValue(levelNumber);
 		fasterSlider.setValue(fasterSpeed);
-
+	}
+	
+	private void addListenersToActors() {
 		faster.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
 				isFaster = faster.isChecked();
@@ -330,15 +313,15 @@ public class UserInterface {
 		});
 		start.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-				hideMainMenu();
-				disposeMainMenu();
+				hide();
+				dispose();
 				game.setScreen(new LoadingScreen(game));
 			}
 		});
 		license.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-				hideMainMenu();
-				disposeMainMenu();
+				hide();
+				dispose();
 				game.setScreen(new LicenseScreen(game));
 			}
 		});
@@ -354,7 +337,12 @@ public class UserInterface {
 		});
 	}
 	
-	public void loadSavedStuff () {
+	private void hide() {
+		setPreferences();
+		savePreferences();
+	}
+	
+	private void loadSavedStuff () {
 		savedStuff.loadPreferencesAndScore();
 		
 		levelNumber = savedStuff.getLevelNumber();
@@ -371,7 +359,7 @@ public class UserInterface {
 		allScores = savedStuff.getAllScores();
 	}
 	
-	public void setPreferences() {
+	private void setPreferences() {
 		savedStuff.setFaster(isFaster);
 		savedStuff.setColor(isColor);
 		savedStuff.setAnimate(isAnimate);
@@ -382,18 +370,64 @@ public class UserInterface {
 		savedStuff.setLevelNumber(levelNumber);
 	}
 	
-	public void savePreferences() {
+	private void savePreferences() {
 		savedStuff.savePreferences();
 	}
-
-	public void loadMainMenuAssets() {
-		checked = assets.getChecked();
-		unchecked = assets.getUnchecked();
-		background = assets.getBackground();
-		knob = assets.getKnob();
-		patchBox = assets.getPatchBox();
-		finePrint = assets.getFinePrint();
-		font = assets.getFont();
-		titleSprite = assets.getTitleSprite();
+	public void render(float delta) {
+		// 286, 134
+		batch.setProjectionMatrix(cam.combined);
+		batch.begin();
+		titleSprite.draw(batch);
+		setLevelPreview();
+		if (levelNumber != 0) {
+			batch.draw(levelPreviewRegion, 50, -27);
+		}
+		hiScoreBuilder.setLength(0);
+		hiScoreBuilder.append(HI_SCORE_STRING);
+		if (isFaster) {
+			hiScore = allScores[levelNumber][fasterSpeed];
+		} else {
+			hiScore = allScores[levelNumber][SavedStuff.NUMBER_OF_SPEEDS - 1];	
+		}
+		hiScoreBuilder.append(hiScore);
+		highScoreString = hiScoreBuilder.toString();
+		font.draw(batch, highScoreString, 50, 73);
+		
+		batch.end();
+		stage.act(delta);
+		stage.draw();
+	}
+	
+	private void setLevelPreview () {
+		switch (levelNumber) {
+		case 1:
+			levelPreviewRegion = assets.getLevelOnePreviewRegion();
+			break;
+		case 2:
+			levelPreviewRegion = assets.getLevelTwoPreviewRegion();
+			break;
+		case 3:
+			levelPreviewRegion = assets.getLevelThreePreviewRegion();
+			break;
+		case 4:
+			levelPreviewRegion = assets.getLevelFourPreviewRegion();
+			break;
+		case 5:
+			levelPreviewRegion = assets.getLevelFivePreviewRegion();
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
+	
+	public void dispose() {
+		batch.dispose();
+		stage.dispose();
+		skin.dispose();
+		font.dispose();
 	}
 }
