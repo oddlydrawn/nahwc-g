@@ -429,5 +429,6 @@ public class MainMenuInterface {
 		stage.dispose();
 		skin.dispose();
 		font.dispose();
+		assets.disposeMainMenu();
 	}
 }
